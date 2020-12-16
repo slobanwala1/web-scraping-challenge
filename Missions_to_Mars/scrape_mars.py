@@ -1,7 +1,10 @@
+# Dependencies
+import time
 import pandas as pd
+from bs4 import BeautifulSoup
 from splinter import Browser
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
+import requests
 
 # Setup chrome driver for Chrome tool
 def init_browser():
@@ -13,34 +16,41 @@ def init_browser():
 def scrape():
     
     # ------------------------------PART 1 START-------------------------------#
-    """ NASA Mars Latest News Title and Content """
+    
     # Setup splinter
     browser = init_browser()
     #browser = Browser('chrome', **executable_path, headless=False)
-
+    
     # URL of page to be scraped
     news_url = "https://mars.nasa.gov/news/"
-
+    
     browser.visit(news_url)
-
+    
+    # To stop errors because it took a second to load
+    time.sleep(1)
+    
     # Store the html object
     news_html = browser.html
-
+    
     # Create BeautifulSoup object; parse with 'html.parser'
     mars_news_soup = BeautifulSoup(news_html, 'html.parser')
-
-    # Could'nt grab title so grabbing content instead
-    news_title = mars_news_soup.find('div', class_='list_text').find('a').text
-
-    news_content = mars_news_soup.find('div', class_='article_teaser_body').text
-
+    
+    # Grab the whole list then rip it apart for easier access and less prone to errors
+    mars_news_list = mars_news_soup.find('ul', class_='item_list')
+    
+    latest_headline = mars_news_list.find('li', class_ = 'slide')
+    
+    news_title = latest_headline.find("div", class_='content_title').text
+    
+    news_content = mars_news_soup.find("div", class_='article_teaser_body').text
+    
     # Close Browser.
     browser.quit()
     
     print(news_title + '\n' + news_content)
-    
     # ------------------------------PART 1 END-------------------------------#
     
+    # ------------------------------PART 2 START-------------------------------#
     """ JPL Mars Space Images - Featured Image """
     # Setup splinter
     browser = init_browser()
@@ -48,14 +58,23 @@ def scrape():
     jpl_mars_img_url = "https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars"
     browser.visit(jpl_mars_img_url)
     
+    # To stop errors because it took a second to load
+    time.sleep(1)
+    
     # https://splinter.readthedocs.io/en/latest/api/driver-and-element-api.html
     # use click_link_by_partial_text
     browser.click_link_by_partial_text("FULL IMAGE")
+    
+    # To stop errors because it took a second to load
+    time.sleep(1)
     
     # Have to click more info to open up bigger image, use find_link_by_partial_text again. Really useful function
     browser.is_element_present_by_text("more info", wait_time=1)
     bigger_img_elem = browser.find_link_by_partial_text("more info")
     bigger_img_elem.click()
+    
+    # To stop errors because it took a second to load
+    time.sleep(1)
     
     # Store the html object
     img_html = browser.html
@@ -83,7 +102,7 @@ def scrape():
     # use read_html
     mars_facts_tables = pd.read_html(mars_facts_url)
     
-    mars_facts_df = mars_facts_tables[0]
+    mars_facts_df = mars_facts_tables[1]
     
     # Set first column to Description as the prompt shows, and the second is Measurement/Units
     mars_facts_df.columns = ['Description', 'Measurement/Units']
@@ -93,8 +112,7 @@ def scrape():
     
     # To use on website we need it in html format
     # Remove header just use html to produce header as it looks nicer
-    mars_facts_df.to_html('Resources/mars_facts.html', index=False, header=False)
-    mars_facts = mars_facts_df.to_html(index=False, header=False)
+    mars_facts = mars_facts_df.to_html(index=True, header=True)
     
     # ------------------------------PART 3 END-------------------------------#
     
@@ -108,6 +126,9 @@ def scrape():
     mars_hemis_homepage = "https://astrogeology.usgs.gov";
     
     browser.visit(mars_hemis_url)
+    
+    # To stop errors because it took a second to load
+    time.sleep(1)
     
     # store into html object again
     hemis_html = browser.html
@@ -141,6 +162,9 @@ def scrape():
         browser = init_browser()
         browser.visit(mars_url_full)
         
+        # To stop errors because it took a second to load
+        time.sleep(1)
+        
         hemis_html = browser.html
         hemis_soup = BeautifulSoup(hemis_html, 'html.parser')
         
@@ -156,7 +180,6 @@ def scrape():
         browser.quit()
     
     print(mars_hemis_urls)
-
 # ------------------------------PART 4 END-------------------------------#
 
 # ------------------------------PART 5 START-------------------------------#
