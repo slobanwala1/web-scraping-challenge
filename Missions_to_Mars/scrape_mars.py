@@ -1,6 +1,9 @@
 from flask import Flask, render_template, redirect
 from flask_pymongo import PyMongo
 import scrape_costa
+import pandas as pd
+from splinter import Browser
+from bs4 import BeautifulSoup
 
 # Create an instance of Flask
 app = Flask(__name__)
