@@ -3,13 +3,11 @@ import time
 import pandas as pd
 from bs4 import BeautifulSoup
 from splinter import Browser
-from webdriver_manager.chrome import ChromeDriverManager
-import requests
 
 # Setup chrome driver for Chrome tool
 def init_browser():
     #executable_path = {"executable_path": "C:/chromedriver/chromedriver"}
-    executable_path = {'executable_path': ChromeDriverManager().install()}
+    executable_path = {"executable_path": "C:/Users/slobanwala/.wdm/drivers/chromedriver/win32/87.0.4280.88/chromedriver.exe"}
     return Browser("chrome", **executable_path, headless=False)
 
 # Scrape function grabbed from jupyter notebook
@@ -102,17 +100,17 @@ def scrape():
     # use read_html
     mars_facts_tables = pd.read_html(mars_facts_url)
     
-    mars_facts_df = mars_facts_tables[1]
+    mars_facts_df = mars_facts_tables[0]
     
     # Set first column to Description as the prompt shows, and the second is Measurement/Units
-    mars_facts_df.columns = ['Description', 'Measurement/Units']
+    mars_facts_df.columns = ['Description', '']
     
     # mars_facts_df
     
     
     # To use on website we need it in html format
     # Remove header just use html to produce header as it looks nicer
-    mars_facts = mars_facts_df.to_html(index=True, header=True)
+    mars_facts = mars_facts_df.to_html(index=False, header=True)
     
     # ------------------------------PART 3 END-------------------------------#
     
